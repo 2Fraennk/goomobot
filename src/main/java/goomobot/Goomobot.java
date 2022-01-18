@@ -34,6 +34,10 @@ public class Goomobot {
         //authToken = getAuthToken(responseBody);
         //userId = getUserId(responseBody);
         System.out.println("userId: "+userId);
+        System.out.println("authToken: "+authToken);
+        System.out.println("roomId: "+roomId);
+        System.out.println("aka: "+aka);
+        System.out.println("host: "+host);
         foundMessages = searchMessages(userId,authToken,roomId,searchMessage);
         System.out.println("foundMessages: " + foundMessages);
         if (foundMessages == true) {
