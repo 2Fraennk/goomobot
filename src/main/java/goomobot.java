@@ -14,7 +14,7 @@ import java.time.temporal.ChronoUnit;
 import static java.net.http.HttpRequest.*;
 
 
-public class Rakete {
+public class Goomobot {
     private static String url = "";
     private static String user = "";
     private static String passwd = "";
