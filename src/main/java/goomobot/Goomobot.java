@@ -93,6 +93,12 @@ public class Goomobot {
     }
 
     public static boolean searchMessages(String XUserId, String XAuthToken, String roomId, String searchMessage) throws IOException, InterruptedException, URISyntaxException {
+        System.out.println("userId2: "+userId);
+        System.out.println("authToken2: "+authToken);
+        System.out.println("roomId2: "+roomId);
+        System.out.println("aka2: "+aka);
+        System.out.println("host2: "+host);
+
         URI URI;
         URI = new URI(
                 "https",
