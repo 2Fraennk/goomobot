@@ -41,7 +41,7 @@ public class Goomobot {
         foundMessages = searchMessages(userId,authToken,roomId,searchMessage);
         System.out.println("foundMessages: " + foundMessages);
         if (foundMessages == true) {
-            //sendMessage(userId, authToken, roomId, sendMessage);
+            sendMessage(userId, authToken, roomId, sendMessage);
             System.out.println("Passt! Message wurde versendet!");
         }
     }
