@@ -23,7 +23,7 @@ public class Goomobot {
     private static String userId = System.getProperty("userId");
     private static String authToken = System.getProperty("authToken");
     private static String searchMessage = "";
-    private static String sendMessage = "";
+    private static String message2send = "";
     private static JsonObject responseData = null;
     private static String roomId = System.getProperty("roomId");
     private static String aka = System.getProperty("aka");
@@ -32,9 +32,6 @@ public class Goomobot {
     private static boolean foundMessages = false;
 
     public static void main(String[] args) throws IOException, InterruptedException, URISyntaxException {
-
-        System.out.println("foundMessages: " + foundMessages);
-
         String messagesFile = "./messages.txt";
         InputStream input = new FileInputStream(messagesFile);
         BufferedReader br = new BufferedReader(new InputStreamReader(input));
@@ -45,25 +42,28 @@ public class Goomobot {
         while ((lr.readLine()) != null) {
             lineNr = lr.getLineNumber();
         }
-
         for (int i=0; i < lineNr; i++) {
             searchMessage = br.readLine();
-            System.out.println(searchMessage);
+            System.out.println("searchMessage: " + searchMessage);
             foundMessages = searchMessages(userId, authToken, roomId, searchMessage);
-            if (foundMessages == true) {
-                sendMessage(userId, authToken, roomId);
-                //break;
-            }
         }
-    }
+        if (foundMessages == true) {
+            String message2send = chooseSendMessage();
+            sendMessage(userId, authToken, roomId,message2send);
+            //break;
+        }
+        else {
+            System.out.println("no message found: " + foundMessages);
+        }
 
+    }
 
     public static String loginAndGetMessages(String url, String user, String passwd) throws IOException, InterruptedException, URISyntaxException {
         URI URI;
         URI = new URI(
                 "https",
                 host,
-                "/api/v1chat.search?roomId="+roomId+"=\""+sendMessage+"\"",
+                "/api/v1chat.search?roomId="+roomId+"=\""+message2send+"\"",
                 null);
 
         HttpRequest request = newBuilder()
@@ -147,11 +147,10 @@ public class Goomobot {
         return foundMessages;
     }
 
-
-    public static void sendMessage(String XUserId, String XAuthToken, String roomId) throws IOException, InterruptedException, URISyntaxException {
+    public static void sendMessage(String XUserId, String XAuthToken, String roomId, String message2send) throws IOException, InterruptedException, URISyntaxException {
         String propsFile = "./.properties";
         InputStream input = new FileInputStream(propsFile);
-        sendMessage = chooseSendMessage();
+//        sendMessage = chooseSendMessage();
 
         Properties props = new Properties();
         props.load(input);
@@ -159,40 +158,45 @@ public class Goomobot {
         System.out.println("lastSuccessfulMessageCommitDate: " + lastSuccessfulMessageCommitDate);
         input.close();
 
-        if (!lastSuccessfulMessageCommitDate.contains(LocalDate.now().toString())) {
-            URI URI;
-            URI = new URI(
-                    "https",
-                    host,
-                    "/api/v1/chat.postMessage",
-                    null);
+        if (message2send != null) {
+            if (!lastSuccessfulMessageCommitDate.contains(LocalDate.now().toString())) {
+                URI URI;
+                URI = new URI(
+                        "https",
+                        host,
+                        "/api/v1/chat.postMessage",
+                        null);
 
-            HttpRequest request = newBuilder()
-                    .uri(URI)
-                    .setHeader("Content-Type", "application/json")
-                    .setHeader("X-Auth-Token", XAuthToken)
-                    .setHeader("X-User-Id", XUserId)
-                    .POST(HttpRequest.BodyPublishers.ofString("{\"alias\": \"" + aka + "\",\"channel\": \"" + roomId + "\",\"text\": \"" + sendMessage + "\"}"))
-                    .timeout(Duration.of(30, ChronoUnit.SECONDS))
-                    .build();
+                HttpRequest request = newBuilder()
+                        .uri(URI)
+                        .setHeader("Content-Type", "application/json")
+                        .setHeader("X-Auth-Token", XAuthToken)
+                        .setHeader("X-User-Id", XUserId)
+                        .POST(HttpRequest.BodyPublishers.ofString("{\"alias\": \"" + aka + "\",\"channel\": \"" + roomId + "\",\"text\": \"" + message2send + "\"}"))
+                        .timeout(Duration.of(30, ChronoUnit.SECONDS))
+                        .build();
 
-            HttpResponse<String> response = HttpClient
-                    .newBuilder()
-                    //.proxy(ProxySelector.getDefault())
-                    .build()
-                    .send(request, HttpResponse.BodyHandlers.ofString());
+                HttpResponse<String> response = HttpClient
+                        .newBuilder()
+                        //.proxy(ProxySelector.getDefault())
+                        .build()
+                        .send(request, HttpResponse.BodyHandlers.ofString());
 
-            System.out.println(response.statusCode());
+                System.out.println(response.statusCode());
 
-            if (response.statusCode() == 200) {
-                LocalDate ld;
-                ld = LocalDate.now();
-                System.out.println("ld: " + ld);
+                if (response.statusCode() == 200) {
+                    System.out.println("message successfully send.");
+                    LocalDate ld;
+                    ld = LocalDate.now();
+                    System.out.println("ld: " + ld);
 
-                props.setProperty("lastSuccessfulMessageCommitDate", String.valueOf(ld));
-                props.store(new FileOutputStream(propsFile), null);
-
-                System.out.println("message successfully send.");
+                    props.setProperty("lastSuccessfulMessageCommitDate", String.valueOf(ld));
+                    props.store(new FileOutputStream(propsFile), null);
+                    System.out.println("timestamp successfully updated.");
+                }
+            }
+            else {
+                System.out.println("today already answered");
             }
         }
     }
@@ -219,7 +223,7 @@ public class Goomobot {
         // find line with random number
         for (int i = 0; i < int_random; i++) {
             message2send = br.readLine();
-            System.out.println(message2send);
+//            System.out.println(message2send);
         }
 
         input.close();
